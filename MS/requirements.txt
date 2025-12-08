@@ -1,0 +1,7 @@
+flask>=3.0.0
+agent-framework>=1.0.0b1
+openai>=1.0.0
+google-adk>=1.0.0
+litellm>=1.0.0
+requests>=2.31.0
+

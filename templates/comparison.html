@@ -1,0 +1,2430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agentic Weather Assistant</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            animation: containerSlideIn 0.6s ease-out;
+        }
+
+        @keyframes containerSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: headerShimmer 8s ease-in-out infinite;
+        }
+
+        @keyframes headerShimmer {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(50%, 50%) rotate(180deg); }
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 12px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            animation: titleFadeIn 0.8s ease-out;
+        }
+
+        @keyframes titleFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header p {
+            font-size: 1.15em;
+            opacity: 0.95;
+            font-weight: 400;
+            position: relative;
+            z-index: 1;
+            animation: subtitleFadeIn 1s ease-out;
+        }
+
+        @keyframes subtitleFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 0.95;
+                transform: translateY(0);
+            }
+        }
+
+        .input-section {
+            padding: 35px 30px;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+            border-bottom: 1px solid rgba(233, 236, 239, 0.5);
+            position: relative;
+        }
+
+        .input-section::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(102, 126, 234, 0.3), transparent);
+        }
+
+        .input-container {
+            display: flex;
+            gap: 15px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        #messageInput {
+            flex: 1;
+            padding: 18px 24px;
+            font-size: 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 14px;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: white;
+            font-family: inherit;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        #messageInput:focus {
+            border-color: #667eea;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2);
+            transform: translateY(-1px);
+        }
+
+        #messageInput::placeholder {
+            color: #adb5bd;
+            font-weight: 400;
+        }
+
+        #sendButton {
+            padding: 18px 48px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #sendButton::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        #sendButton:hover:not(:disabled)::before {
+            left: 100%;
+        }
+
+        #sendButton:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        #sendButton:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        #sendButton:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+            position: relative;
+        }
+
+        .comparison-container::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: linear-gradient(to bottom, transparent, rgba(102, 126, 234, 0.3), transparent);
+            transform: translateX(-50%);
+            z-index: 1;
+        }
+
+        .column {
+            padding: 35px 30px;
+            border-right: 1px solid rgba(233, 236, 239, 0.5);
+            display: flex;
+            flex-direction: column;
+            background: white;
+            transition: background 0.3s ease;
+            position: relative;
+        }
+
+        .column:hover {
+            background: #fafbfc;
+        }
+
+        .column:last-child {
+            border-right: none;
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(233, 236, 239, 0.6);
+            position: relative;
+        }
+
+        .column-header::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 60px;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, transparent);
+            transition: width 0.3s ease;
+        }
+
+        .column:hover .column-header::after {
+            width: 100%;
+        }
+
+        .column-title {
+            font-size: 1.9em;
+            font-weight: 700;
+            color: #333;
+            letter-spacing: -0.3px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .column-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            border-radius: 2px;
+            background: currentColor;
+            display: inline-block;
+        }
+
+        .gadk-title {
+            color: #667eea;
+        }
+
+        .ms-title {
+            color: #764ba2;
+        }
+
+        .time-badge {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            color: #666;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .time-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .time-badge.active::before {
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .time-badge.active {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            transform: scale(1.05);
+        }
+
+        .metrics-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .metrics-badge {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .metric-item {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            color: #666;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: help;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border: 1px solid transparent;
+        }
+
+        .metric-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-item.high {
+            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        .metric-item.medium {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+            color: #856404;
+            border-color: #ffeaa7;
+        }
+
+        .metric-item.low {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .metric-label {
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .metric-value {
+            font-weight: bold;
+        }
+
+        .chat-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 0;
+            min-height: 400px;
+        }
+
+        .message {
+            margin-bottom: 20px;
+            animation: messageSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .message.user {
+            text-align: right;
+        }
+
+        .message-content {
+            display: inline-block;
+            max-width: 80%;
+            padding: 14px 20px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            line-height: 1.7;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .message-content:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-content.formatted {
+            white-space: pre-wrap;
+        }
+
+        .message-content.formatted ul,
+        .message-content.formatted ol {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+
+        .message-content.formatted li {
+            margin: 6px 0;
+            line-height: 1.5;
+        }
+
+        .message-content.formatted strong {
+            display: block;
+            margin-top: 14px;
+            margin-bottom: 8px;
+            font-size: 1.08em;
+            font-weight: 600;
+            color: inherit;
+        }
+
+        .message-content.formatted p {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+
+        .message-content.formatted p:first-child {
+            margin-top: 0;
+        }
+
+        .message-content.formatted p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-content.formatted h3,
+        .message-content.formatted h4 {
+            margin-top: 14px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .message.assistant .message-content {
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            color: #333;
+            border: 1px solid rgba(222, 226, 230, 0.6);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .message.error .message-content {
+            background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+            color: #c33;
+            border: 1px solid #fcc;
+            box-shadow: 0 2px 8px rgba(204, 51, 51, 0.2);
+        }
+
+        .loading {
+            display: inline-block;
+            padding: 14px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 18px;
+            color: #666;
+            font-style: italic;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .loading::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            animation: loadingShimmer 1.5s infinite;
+        }
+
+        @keyframes loadingShimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s steps(4, end) infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.success {
+            background: #28a745;
+        }
+
+        .status-indicator.error {
+            background: #dc3545;
+        }
+
+        .status-indicator.loading {
+            background: #ffc107;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #adb5bd;
+            padding: 60px 20px;
+            font-style: italic;
+            font-size: 1.1em;
+            position: relative;
+        }
+
+        .empty-state::before {
+            content: '💬';
+            display: block;
+            font-size: 3em;
+            margin-bottom: 15px;
+            opacity: 0.5;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .comparison-results {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(222, 226, 230, 0.6);
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            animation: resultsSlideIn 0.5s ease-out;
+        }
+
+        @keyframes resultsSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .comparison-results.visible {
+            display: block;
+        }
+
+        .comparison-results-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .comparison-results-title::before {
+            content: "📊";
+            font-size: 1.2em;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .metric-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            padding: 18px;
+            border-radius: 12px;
+            border-left: 4px solid #dee2e6;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: currentColor;
+            transition: width 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card:hover::before {
+            width: 100%;
+            opacity: 0.05;
+        }
+
+        .metric-card.high {
+            border-left-color: #28a745;
+        }
+
+        .metric-card.medium {
+            border-left-color: #ffc107;
+        }
+
+        .metric-card.low {
+            border-left-color: #dc3545;
+        }
+
+        .metric-name {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .metric-score {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: scoreCountUp 0.8s ease-out;
+        }
+
+        @keyframes scoreCountUp {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .metric-details {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 4px;
+        }
+
+        .comparison-summary {
+            margin-top: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .comparison-summary strong {
+            color: #333;
+        }
+
+        .sequence-diagram-container {
+            margin-top: 25px;
+            padding: 24px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(222, 226, 230, 0.6);
+            display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            animation: diagramSlideIn 0.5s ease-out;
+        }
+
+        @keyframes diagramSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .sequence-diagram-container.visible {
+            display: block;
+        }
+
+        .sequence-diagram-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sequence-diagram-title::before {
+            content: "🔄";
+            font-size: 1.2em;
+        }
+
+        .sequence-diagram-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .play-btn, .reset-btn {
+            padding: 10px 20px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .play-btn::before, .reset-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s;
+        }
+
+        .play-btn:hover::before, .reset-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .play-btn {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .play-btn:hover {
+            background: linear-gradient(135deg, #218838 0%, #1ea080 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .play-btn.playing {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .play-btn.playing:hover {
+            background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%);
+            color: white;
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #495057 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+        }
+
+        .sequence-svg {
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(222, 226, 230, 0.6);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .sequence-svg:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .sequence-actor {
+            fill: #667eea;
+            stroke: #4c63d2;
+            stroke-width: 2;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sequence-actor.active {
+            fill: #ffc107;
+            stroke: #ff9800;
+            filter: drop-shadow(0 0 8px rgba(255, 193, 7, 0.6));
+        }
+
+        .sequence-lifeline {
+            stroke: #dee2e6;
+            stroke-width: 1;
+            stroke-dasharray: 5,5;
+        }
+
+        .sequence-arrow {
+            stroke: #667eea;
+            stroke-width: 2;
+            fill: none;
+            marker-end: url(#arrowhead);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sequence-arrow.active {
+            opacity: 1;
+            animation: arrowSlide 0.6s ease-in-out;
+        }
+
+        @keyframes arrowSlide {
+            0% {
+                stroke-dasharray: 0, 1000;
+            }
+            100% {
+                stroke-dasharray: 1000, 0;
+            }
+        }
+
+        .sequence-label {
+            font-size: 10px;
+            fill: #333;
+            text-anchor: middle;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-weight: 500;
+        }
+
+        .sequence-label.active {
+            opacity: 1;
+        }
+
+        .sequence-label-bg {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .sequence-label-bg.active {
+            opacity: 0.9;
+        }
+
+        .sequence-tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+        }
+
+        .sequence-tooltip.visible {
+            display: block;
+        }
+
+        /* Scrollbar styling */
+        .chat-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-area::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .chat-area::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+        }
+
+        .chat-area::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #5568d3 0%, #653a8f 100%);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 16px;
+            }
+
+            .header {
+                padding: 30px 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .input-section {
+                padding: 25px 20px;
+            }
+
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-container::before {
+                display: none;
+            }
+
+            .column {
+                border-right: none;
+                border-bottom: 1px solid rgba(233, 236, 239, 0.5);
+                padding: 25px 20px;
+            }
+
+            .column:last-child {
+                border-bottom: none;
+            }
+
+            .sequence-svg {
+                height: 300px;
+            }
+
+            .input-container {
+                flex-direction: column;
+            }
+
+            #sendButton {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌤️ Agentic Weather Assistant</h1>
+            <p>Compare Google ADK-Python and Microsoft Agent-Framework Side by Side</p>
+        </div>
+
+        <div class="input-section">
+            <div class="input-container">
+                <input 
+                    type="text" 
+                    id="messageInput" 
+                    placeholder="Ask about the weather... (e.g., 'What's the weather in Helsinki?')"
+                    autocomplete="off"
+                >
+                <button id="sendButton" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+
+        <div class="comparison-container">
+            <div class="column">
+                <div class="column-header">
+                    <div class="column-title gadk-title">Google ADK</div>
+                    <div class="metrics-container">
+                        <div class="time-badge" id="gadkTime">Ready</div>
+                        <div class="metrics-badge" id="gadkMetrics" style="display: none;">
+                            <div class="metric-item" title="Accuracy: Measures factual correctness">
+                                <span class="metric-label">Accuracy:</span>
+                                <span class="metric-value" id="gadkAccuracy">-</span>
+                            </div>
+                            <div class="metric-item" title="Task Completion: Whether the task was completed">
+                                <span class="metric-label">Task:</span>
+                                <span class="metric-value" id="gadkCompletion">-</span>
+                            </div>
+                            <div class="metric-item" title="Recommendation Quality: Quality of suggestions">
+                                <span class="metric-label">Quality:</span>
+                                <span class="metric-value" id="gadkQuality">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-area" id="gadkChat">
+                    <div class="empty-state">Waiting for your message...</div>
+                </div>
+                <div class="comparison-results" id="gadkResults">
+                    <div class="comparison-results-title">Performance Metrics</div>
+                    <div class="metrics-grid" id="gadkMetricsGrid"></div>
+                    <div class="comparison-summary" id="gadkSummary"></div>
+                </div>
+                <div class="sequence-diagram-container" id="gadkSequenceDiagram">
+                    <div class="sequence-diagram-title">Agent Orchestration Flow</div>
+                    <div class="sequence-diagram-controls">
+                        <button id="gadkPlayBtn" class="play-btn" onclick="playSequenceAnimation('gadk')">▶ Play</button>
+                        <button id="gadkResetBtn" class="reset-btn" onclick="resetSequenceAnimation('gadk')">↻ Reset</button>
+                    </div>
+                    <svg id="gadkSequenceSvg" class="sequence-svg"></svg>
+                </div>
+                <div class="sequence-diagram-container" id="gadkLearningDiagram">
+                    <div class="sequence-diagram-title">User Preference Learning Flow</div>
+                    <div class="sequence-diagram-controls">
+                        <button id="gadkLearningPlayBtn" class="play-btn" onclick="playSequenceAnimation('gadkLearning')">▶ Play</button>
+                        <button id="gadkLearningResetBtn" class="reset-btn" onclick="resetSequenceAnimation('gadkLearning')">↻ Reset</button>
+                    </div>
+                    <svg id="gadkLearningSvg" class="sequence-svg"></svg>
+                </div>
+            </div>
+
+            <div class="column">
+                <div class="column-header">
+                    <div class="column-title ms-title">Microsoft Agent</div>
+                    <div class="metrics-container">
+                        <div class="time-badge" id="msTime">Ready</div>
+                        <div class="metrics-badge" id="msMetrics" style="display: none;">
+                            <div class="metric-item" title="Accuracy: Measures factual correctness">
+                                <span class="metric-label">Accuracy:</span>
+                                <span class="metric-value" id="msAccuracy">-</span>
+                            </div>
+                            <div class="metric-item" title="Task Completion: Whether the task was completed">
+                                <span class="metric-label">Task:</span>
+                                <span class="metric-value" id="msCompletion">-</span>
+                            </div>
+                            <div class="metric-item" title="Recommendation Quality: Quality of suggestions">
+                                <span class="metric-label">Quality:</span>
+                                <span class="metric-value" id="msQuality">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-area" id="msChat">
+                    <div class="empty-state">Waiting for your message...</div>
+                </div>
+                <div class="comparison-results" id="msResults">
+                    <div class="comparison-results-title">Performance Metrics</div>
+                    <div class="metrics-grid" id="msMetricsGrid"></div>
+                    <div class="comparison-summary" id="msSummary"></div>
+                </div>
+                <div class="sequence-diagram-container" id="msSequenceDiagram">
+                    <div class="sequence-diagram-title">Agent Orchestration Flow</div>
+                    <div class="sequence-diagram-controls">
+                        <button id="msPlayBtn" class="play-btn" onclick="playSequenceAnimation('ms')">▶ Play</button>
+                        <button id="msResetBtn" class="reset-btn" onclick="resetSequenceAnimation('ms')">↻ Reset</button>
+                    </div>
+                    <svg id="msSequenceSvg" class="sequence-svg"></svg>
+                </div>
+                <div class="sequence-diagram-container" id="msLearningDiagram">
+                    <div class="sequence-diagram-title">User Preference Learning Flow</div>
+                    <div class="sequence-diagram-controls">
+                        <button id="msLearningPlayBtn" class="play-btn" onclick="playSequenceAnimation('msLearning')">▶ Play</button>
+                        <button id="msLearningResetBtn" class="reset-btn" onclick="resetSequenceAnimation('msLearning')">↻ Reset</button>
+                    </div>
+                    <svg id="msLearningSvg" class="sequence-svg"></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script>
+        let sessionId = null;
+        const sequenceAnimations = {
+            gadk: { data: null, playing: false, currentIndex: 0, timeoutId: null },
+            ms: { data: null, playing: false, currentIndex: 0, timeoutId: null },
+            gadkLearning: { data: null, playing: false, currentIndex: 0, timeoutId: null },
+            msLearning: { data: null, playing: false, currentIndex: 0, timeoutId: null }
+        };
+
+        // Allow Enter key to send message
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Add focus animation to input
+        const messageInput = document.getElementById('messageInput');
+        messageInput.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'scale(1.01)';
+        });
+        messageInput.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'scale(1)';
+        });
+
+        // Add typing indicator effect
+        let typingIndicatorInterval = null;
+        function showTypingIndicator() {
+            const dots = ['.', '..', '...'];
+            let dotIndex = 0;
+            typingIndicatorInterval = setInterval(() => {
+                const loadingElements = document.querySelectorAll('.loading');
+                loadingElements.forEach(el => {
+                    const text = el.textContent.replace(/\.+$/, '');
+                    el.textContent = text + dots[dotIndex % dots.length];
+                });
+                dotIndex++;
+            }, 500);
+        }
+
+        function hideTypingIndicator() {
+            if (typingIndicatorInterval) {
+                clearInterval(typingIndicatorInterval);
+                typingIndicatorInterval = null;
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) {
+                return;
+            }
+
+            // Disable input and button
+            input.disabled = true;
+            document.getElementById('sendButton').disabled = true;
+
+            // Clear empty states
+            clearEmptyStates();
+
+            // Add user message to both columns
+            addMessage('gadkChat', message, 'user');
+            addMessage('msChat', message, 'user');
+
+            // Add loading indicators
+            const gadkLoading = addLoading('gadkChat');
+            const msLoading = addLoading('msChat');
+            showTypingIndicator();
+
+            // Update time badges
+            updateTimeBadge('gadkTime', 'Processing...', true);
+            updateTimeBadge('msTime', 'Processing...', true);
+
+            // Send request
+            fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    message: message,
+                    user_id: 'default_user',
+                    session_id: sessionId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Remove loading indicators
+                removeLoading(gadkLoading);
+                removeLoading(msLoading);
+                hideTypingIndicator();
+
+                // Update session ID
+                if (data.session_id) {
+                    sessionId = data.session_id;
+                }
+
+                // Display GADK response
+                if (data.gadk) {
+                    const status = data.gadk.status || 'error';
+                    const response = data.gadk.response || 'No response received';
+                    addMessage('gadkChat', response, status === 'success' ? 'assistant' : 'error');
+                    updateTimeBadge('gadkTime', `${data.gadk_time || 0}s`, status === 'success');
+                    
+                    // Display metrics if available
+                    if (data.gadk.metrics) {
+                        displayMetrics('gadk', data.gadk.metrics);
+                    }
+                    
+                    // Display sequence diagram if available
+                    if (data.gadk && data.gadk.execution_events) {
+                        console.log('GADK execution events:', data.gadk.execution_events);
+                        displaySequenceDiagram('gadk', data.gadk.execution_events);
+                    }
+                    
+                    // Display learning diagram if available
+                    if (data.gadk && data.gadk.learning_events) {
+                        console.log('GADK learning events:', data.gadk.learning_events);
+                        displaySequenceDiagram('gadkLearning', data.gadk.learning_events);
+                    }
+                } else {
+                    addMessage('gadkChat', 'No response from GADK', 'error');
+                    updateTimeBadge('gadkTime', 'Error', false);
+                }
+
+                // Display MS response
+                if (data.ms) {
+                    const status = data.ms.status || 'error';
+                    const response = data.ms.response || data.ms.response || 'No response received';
+                    addMessage('msChat', response, status === 'success' ? 'assistant' : 'error');
+                    updateTimeBadge('msTime', `${data.ms_time || 0}s`, status === 'success');
+                    
+                    // Display metrics if available
+                    if (data.ms.metrics) {
+                        displayMetrics('ms', data.ms.metrics);
+                    }
+                    
+                    // Display sequence diagram if available
+                    if (data.ms && data.ms.execution_events) {
+                        console.log('MS execution events:', data.ms.execution_events);
+                        displaySequenceDiagram('ms', data.ms.execution_events);
+                    }
+                    
+                    // Display learning diagram if available
+                    if (data.ms && data.ms.learning_events) {
+                        console.log('MS learning events:', data.ms.learning_events);
+                        displaySequenceDiagram('msLearning', data.ms.learning_events);
+                    }
+                } else {
+                    addMessage('msChat', 'No response from MS', 'error');
+                    updateTimeBadge('msTime', 'Error', false);
+                }
+
+                // Clear input
+                input.value = '';
+                input.disabled = false;
+                document.getElementById('sendButton').disabled = false;
+                input.focus();
+            })
+            .catch(error => {
+                // Remove loading indicators
+                removeLoading(gadkLoading);
+                removeLoading(msLoading);
+                hideTypingIndicator();
+
+                // Display errors
+                addMessage('gadkChat', `Error: ${error.message}`, 'error');
+                addMessage('msChat', `Error: ${error.message}`, 'error');
+                updateTimeBadge('gadkTime', 'Error', false);
+                updateTimeBadge('msTime', 'Error', false);
+
+                // Re-enable input
+                input.disabled = false;
+                document.getElementById('sendButton').disabled = false;
+            });
+        }
+
+        function clearEmptyStates() {
+            const gadkChat = document.getElementById('gadkChat');
+            const msChat = document.getElementById('msChat');
+            
+            if (gadkChat.querySelector('.empty-state')) {
+                gadkChat.innerHTML = '';
+            }
+            if (msChat.querySelector('.empty-state')) {
+                msChat.innerHTML = '';
+            }
+        }
+
+        function addMessage(chatId, text, type) {
+            const chatArea = document.getElementById(chatId);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            // Format the text for better readability
+            if (type === 'assistant') {
+                contentDiv.className += ' formatted';
+                contentDiv.innerHTML = formatResponse(text);
+            } else {
+                contentDiv.textContent = text;
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            chatArea.appendChild(messageDiv);
+            
+            // Smooth scroll to bottom
+            setTimeout(() => {
+                chatArea.scrollTo({
+                    top: chatArea.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
+        }
+
+        function formatResponse(text) {
+            if (!text) return '';
+            
+            // Escape HTML first to prevent XSS
+            let formatted = text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+            
+            // Convert numbered lists (1., 2., etc.) to HTML lists
+            const lines = formatted.split('\n');
+            let inList = false;
+            let listType = null;
+            let listItems = [];
+            let result = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                // Check for numbered list (1., 2., etc.)
+                const numberedMatch = line.match(/^(\d+)\.\s+(.+)$/);
+                if (numberedMatch) {
+                    if (!inList || listType !== 'ol') {
+                        if (inList && listType === 'ul') {
+                            result.push('</ul>');
+                        }
+                        result.push('<ol>');
+                        inList = true;
+                        listType = 'ol';
+                    }
+                    result.push(`<li>${numberedMatch[2]}</li>`);
+                    continue;
+                }
+                
+                // Check for bullet points (-, *, •)
+                const bulletMatch = line.match(/^[\*\-\•]\s+(.+)$/);
+                if (bulletMatch) {
+                    if (!inList || listType !== 'ul') {
+                        if (inList && listType === 'ol') {
+                            result.push('</ol>');
+                        }
+                        result.push('<ul>');
+                        inList = true;
+                        listType = 'ul';
+                    }
+                    result.push(`<li>${bulletMatch[1]}</li>`);
+                    continue;
+                }
+                
+                // Close list if we hit a non-list item
+                if (inList) {
+                    result.push(listType === 'ol' ? '</ol>' : '</ul>');
+                    inList = false;
+                    listType = null;
+                }
+                
+                // Convert bold headers (**text**)
+                let processedLine = line.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                
+                // Convert section headers (lines ending with :)
+                if (processedLine.match(/^[A-Z][^:]+:\s*$/)) {
+                    processedLine = `<strong>${processedLine.replace(':', '')}</strong>`;
+                }
+                
+                // Skip empty lines
+                if (processedLine) {
+                    result.push(`<p>${processedLine}</p>`);
+                }
+            }
+            
+            // Close any open list
+            if (inList) {
+                result.push(listType === 'ol' ? '</ol>' : '</ul>');
+            }
+            
+            formatted = result.join('');
+            
+            // Clean up empty paragraphs
+            formatted = formatted.replace(/<p>\s*<\/p>/g, '');
+            formatted = formatted.replace(/<p>(<[ou]l>)/g, '$1');
+            formatted = formatted.replace(/(<\/[ou]l>)<\/p>/g, '$1');
+            
+            // Convert line breaks within paragraphs to <br>
+            formatted = formatted.replace(/<p>([^<]+)<\/p>/g, (match, content) => {
+                return `<p>${content.replace(/\n/g, '<br>')}</p>`;
+            });
+            
+            return formatted;
+        }
+
+        function addLoading(chatId) {
+            const chatArea = document.getElementById(chatId);
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant';
+            loadingDiv.id = `${chatId}-loading`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'loading';
+            contentDiv.textContent = 'Thinking';
+            
+            loadingDiv.appendChild(contentDiv);
+            chatArea.appendChild(loadingDiv);
+            
+            // Smooth scroll to bottom
+            setTimeout(() => {
+                chatArea.scrollTo({
+                    top: chatArea.scrollHeight,
+                    behavior: 'smooth'
+                });
+            }, 100);
+            
+            return loadingDiv;
+        }
+
+        function removeLoading(loadingElement) {
+            if (loadingElement && loadingElement.parentNode) {
+                loadingElement.parentNode.removeChild(loadingElement);
+            }
+        }
+
+        function updateTimeBadge(badgeId, text, isActive) {
+            const badge = document.getElementById(badgeId);
+            badge.textContent = text;
+            if (isActive) {
+                badge.classList.add('active');
+            } else {
+                badge.classList.remove('active');
+            }
+        }
+
+        function displayMetrics(framework, metrics) {
+            if (!metrics) return;
+            
+            const accuracy = metrics.accuracy ? (metrics.accuracy.score * 100).toFixed(0) : '-';
+            const completion = metrics.task_completion ? (metrics.task_completion.score * 100).toFixed(0) : '-';
+            const quality = metrics.recommendation_quality ? (metrics.recommendation_quality.score * 100).toFixed(0) : '-';
+            
+            // Update metric values in header badges with animation
+            const accuracyEl = document.getElementById(`${framework}Accuracy`);
+            const completionEl = document.getElementById(`${framework}Completion`);
+            const qualityEl = document.getElementById(`${framework}Quality`);
+            
+            // Animate number counting
+            function animateValue(element, start, end, duration) {
+                if (!element || end === '-') {
+                    if (element) element.textContent = end + '%';
+                    return;
+                }
+                const startNum = parseFloat(start) || 0;
+                const endNum = parseFloat(end);
+                const range = endNum - startNum;
+                const increment = range / (duration / 16);
+                let current = startNum;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if ((increment > 0 && current >= endNum) || (increment < 0 && current <= endNum)) {
+                        current = endNum;
+                        clearInterval(timer);
+                    }
+                    element.textContent = Math.round(current) + '%';
+                }, 16);
+            }
+            
+            if (accuracyEl) animateValue(accuracyEl, accuracyEl.textContent.replace('%', ''), accuracy, 800);
+            if (completionEl) animateValue(completionEl, completionEl.textContent.replace('%', ''), completion, 800);
+            if (qualityEl) animateValue(qualityEl, qualityEl.textContent.replace('%', ''), quality, 800);
+            
+            // Style based on score
+            if (metrics.accuracy) {
+                const accuracyItem = accuracyEl ? accuracyEl.closest('.metric-item') : null;
+                if (accuracyItem) {
+                    accuracyItem.className = 'metric-item ' + getScoreClass(metrics.accuracy.score);
+                }
+            }
+            
+            if (metrics.task_completion) {
+                const completionItem = completionEl ? completionEl.closest('.metric-item') : null;
+                if (completionItem) {
+                    completionItem.className = 'metric-item ' + getScoreClass(metrics.task_completion.score);
+                }
+            }
+            
+            if (metrics.recommendation_quality) {
+                const qualityItem = qualityEl ? qualityEl.closest('.metric-item') : null;
+                if (qualityItem) {
+                    qualityItem.className = 'metric-item ' + getScoreClass(metrics.recommendation_quality.score);
+                }
+            }
+            
+            // Show metrics badge
+            const metricsBadge = document.getElementById(`${framework}Metrics`);
+            if (metricsBadge) {
+                metricsBadge.style.display = 'flex';
+            }
+            
+            // Display detailed comparison results
+            displayDetailedMetrics(framework, metrics);
+        }
+
+        function displayDetailedMetrics(framework, metrics) {
+            const resultsDiv = document.getElementById(`${framework}Results`);
+            const metricsGrid = document.getElementById(`${framework}MetricsGrid`);
+            const summaryDiv = document.getElementById(`${framework}Summary`);
+            
+            if (!resultsDiv || !metricsGrid || !summaryDiv) return;
+            
+            // Clear previous content
+            metricsGrid.innerHTML = '';
+            summaryDiv.innerHTML = '';
+            
+            // Create metric cards with staggered animation
+            let cardDelay = 0;
+            const addCardWithDelay = (card) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    metricsGrid.appendChild(card);
+                    setTimeout(() => {
+                        card.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 10);
+                }, cardDelay);
+                cardDelay += 100;
+            };
+
+            // Create metric cards
+            if (metrics.accuracy) {
+                const card = createMetricCard(
+                    'Accuracy',
+                    metrics.accuracy.score,
+                    metrics.accuracy.details || 'Measures factual correctness of the response',
+                    metrics.accuracy.factual_errors || []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.task_completion) {
+                const card = createMetricCard(
+                    'Task Completion',
+                    metrics.task_completion.score,
+                    metrics.task_completion.details || 'Whether the task was successfully completed',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.recommendation_quality) {
+                const card = createMetricCard(
+                    'Recommendation Quality',
+                    metrics.recommendation_quality.score,
+                    metrics.recommendation_quality.details || 'Quality and usefulness of recommendations',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.context_retention) {
+                const card = createMetricCard(
+                    'Context Retention',
+                    metrics.context_retention.score,
+                    metrics.context_retention.details || 'Ability to remember previous conversation context',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.adaptation_quality) {
+                const card = createMetricCard(
+                    'Adaptation Quality',
+                    metrics.adaptation_quality.score,
+                    metrics.adaptation_quality.details || 'Ability to adapt based on learned preferences',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.response_time) {
+                const timeDetails = metrics.response_time.time_seconds !== null 
+                    ? `${metrics.response_time.time_seconds}s (${metrics.response_time.efficiency_level})`
+                    : metrics.response_time.details;
+                const card = createMetricCard(
+                    'Response Time',
+                    metrics.response_time.score,
+                    timeDetails,
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.tool_call_count) {
+                const toolDetails = metrics.tool_call_count.count !== null
+                    ? `${metrics.tool_call_count.count} call(s) (${metrics.tool_call_count.efficiency_level})`
+                    : metrics.tool_call_count.details;
+                const card = createMetricCard(
+                    'Tool Call Efficiency',
+                    metrics.tool_call_count.score,
+                    toolDetails,
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.action_planning) {
+                const card = createMetricCard(
+                    'Action Planning',
+                    metrics.action_planning.score,
+                    metrics.action_planning.details || 'Assesses sequence of actions',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.error_recovery) {
+                const card = createMetricCard(
+                    'Error Recovery',
+                    metrics.error_recovery.score,
+                    metrics.error_recovery.details || 'Measures error handling ability',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.implementation_effort) {
+                const card = createMetricCard(
+                    'Implementation Effort',
+                    metrics.implementation_effort.score,
+                    metrics.implementation_effort.details || 'Measures development difficulty',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.integration_simplicity) {
+                const card = createMetricCard(
+                    'Integration Simplicity',
+                    metrics.integration_simplicity.score,
+                    metrics.integration_simplicity.details || 'Measures ease of connecting components',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.debuggability) {
+                const card = createMetricCard(
+                    'Debuggability',
+                    metrics.debuggability.score,
+                    metrics.debuggability.details || 'Measures debugging clarity',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.ambiguity_handling) {
+                const card = createMetricCard(
+                    'Ambiguity Handling',
+                    metrics.ambiguity_handling.score,
+                    metrics.ambiguity_handling.details || 'Tests handling of vague input',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            if (metrics.repeatability) {
+                const card = createMetricCard(
+                    'Repeatability / Stability',
+                    metrics.repeatability.score,
+                    metrics.repeatability.details || 'Checks response consistency',
+                    []
+                );
+                addCardWithDelay(card);
+            }
+            
+            // Create summary
+            const summary = createSummary(metrics);
+            summaryDiv.innerHTML = summary;
+            
+            // Show results section
+            resultsDiv.classList.add('visible');
+        }
+
+        function createMetricCard(name, score, details, errors) {
+            const card = document.createElement('div');
+            const scoreClass = getScoreClass(score);
+            card.className = `metric-card ${scoreClass}`;
+            
+            const scorePercent = (score * 100).toFixed(0);
+            
+            card.innerHTML = `
+                <div class="metric-name">${name}</div>
+                <div class="metric-score" data-target="${scorePercent}">0%</div>
+                <div class="metric-details">${details}</div>
+            `;
+            
+            // Animate score on mount
+            setTimeout(() => {
+                const scoreEl = card.querySelector('.metric-score');
+                if (scoreEl) {
+                    animateScoreValue(scoreEl, 0, scorePercent, 1000);
+                }
+            }, 100);
+            
+            return card;
+        }
+
+        function animateScoreValue(element, start, end, duration) {
+            const startNum = parseFloat(start);
+            const endNum = parseFloat(end);
+            const range = endNum - startNum;
+            const increment = range / (duration / 16);
+            let current = startNum;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if ((increment > 0 && current >= endNum) || (increment < 0 && current <= endNum)) {
+                    current = endNum;
+                    clearInterval(timer);
+                }
+                element.textContent = Math.round(current) + '%';
+            }, 16);
+        }
+
+        function createSummary(metrics) {
+            let summary = '<strong>Summary:</strong> ';
+            const parts = [];
+            
+            if (metrics.accuracy) {
+                const score = metrics.accuracy.score;
+                if (score >= 0.8) {
+                    parts.push('high accuracy');
+                } else if (score >= 0.5) {
+                    parts.push('moderate accuracy');
+                } else {
+                    parts.push('low accuracy');
+                }
+                
+                if (metrics.accuracy.factual_errors && metrics.accuracy.factual_errors.length > 0) {
+                    parts.push(`with ${metrics.accuracy.factual_errors.length} factual issue(s)`);
+                }
+            }
+            
+            if (metrics.task_completion) {
+                const score = metrics.task_completion.score;
+                if (score >= 0.7) {
+                    parts.push('task completed successfully');
+                } else {
+                    parts.push('task partially completed');
+                }
+            }
+            
+            if (metrics.recommendation_quality) {
+                const score = metrics.recommendation_quality.score;
+                if (score >= 0.8) {
+                    parts.push('high-quality recommendations');
+                } else if (score >= 0.5) {
+                    parts.push('basic recommendations provided');
+                } else {
+                    parts.push('limited recommendations');
+                }
+            }
+            
+            if (metrics.context_retention) {
+                const score = metrics.context_retention.score;
+                if (score >= 0.7) {
+                    parts.push('good context retention');
+                } else if (score >= 0.5) {
+                    parts.push('moderate context retention');
+                } else {
+                    parts.push('limited context retention');
+                }
+            }
+            
+            if (metrics.adaptation_quality) {
+                const score = metrics.adaptation_quality.score;
+                if (score >= 0.7) {
+                    parts.push('good adaptation to preferences');
+                } else if (score >= 0.5) {
+                    parts.push('moderate adaptation');
+                } else {
+                    parts.push('limited adaptation');
+                }
+            }
+            
+            if (metrics.response_time) {
+                const time = metrics.response_time.time_seconds;
+                if (time !== null) {
+                    if (time < 2) {
+                        parts.push('excellent response time');
+                    } else if (time < 5) {
+                        parts.push('good response time');
+                    } else if (time < 10) {
+                        parts.push('acceptable response time');
+                    } else {
+                        parts.push('slow response time');
+                    }
+                }
+            }
+            
+            if (metrics.tool_call_count) {
+                const count = metrics.tool_call_count.count;
+                if (count !== null) {
+                    if (count <= 2) {
+                        parts.push('efficient tool usage');
+                    } else if (count <= 4) {
+                        parts.push('reasonable tool usage');
+                    } else {
+                        parts.push('high tool usage');
+                    }
+                }
+            }
+            
+            if (metrics.action_planning) {
+                const score = metrics.action_planning.score;
+                if (score >= 0.8) {
+                    parts.push('excellent action planning');
+                } else if (score >= 0.6) {
+                    parts.push('good action planning');
+                } else {
+                    parts.push('needs improvement in planning');
+                }
+            }
+            
+            if (metrics.error_recovery) {
+                const score = metrics.error_recovery.score;
+                if (score >= 0.8) {
+                    parts.push('strong error recovery');
+                } else if (score >= 0.6) {
+                    parts.push('adequate error handling');
+                } else {
+                    parts.push('limited error recovery');
+                }
+            }
+            
+            if (metrics.implementation_effort) {
+                const score = metrics.implementation_effort.score;
+                if (score >= 0.8) {
+                    parts.push('easy to implement');
+                } else if (score >= 0.6) {
+                    parts.push('moderate implementation effort');
+                } else {
+                    parts.push('requires more effort to implement');
+                }
+            }
+            
+            if (metrics.integration_simplicity) {
+                const score = metrics.integration_simplicity.score;
+                if (score >= 0.8) {
+                    parts.push('simple integration');
+                } else if (score >= 0.6) {
+                    parts.push('straightforward integration');
+                } else {
+                    parts.push('complex integration');
+                }
+            }
+            
+            if (metrics.debuggability) {
+                const score = metrics.debuggability.score;
+                if (score >= 0.8) {
+                    parts.push('excellent debugging support');
+                } else if (score >= 0.6) {
+                    parts.push('good debugging tools');
+                } else {
+                    parts.push('limited debugging support');
+                }
+            }
+            
+            if (metrics.ambiguity_handling) {
+                const score = metrics.ambiguity_handling.score;
+                if (score >= 0.8) {
+                    parts.push('excellent ambiguity handling');
+                } else if (score >= 0.6) {
+                    parts.push('good ambiguity handling');
+                } else {
+                    parts.push('needs improvement in handling vague input');
+                }
+            }
+            
+            if (metrics.repeatability) {
+                const score = metrics.repeatability.score;
+                if (score >= 0.8) {
+                    parts.push('high consistency and stability');
+                } else if (score >= 0.6) {
+                    parts.push('moderate consistency');
+                } else {
+                    parts.push('inconsistent responses');
+                }
+            }
+            
+            summary += parts.join(', ') + '.';
+            
+            return summary;
+        }
+
+        function getScoreClass(score) {
+            if (score >= 0.8) return 'high';
+            if (score >= 0.5) return 'medium';
+            return 'low';
+        }
+
+        function displaySequenceDiagram(framework, events) {
+            try {
+                if (!events || events.length === 0) {
+                    console.warn(`No events for ${framework}`);
+                    return;
+                }
+                
+                // Determine container ID based on framework name
+                let containerId;
+                let svgId;
+                if (framework.includes('Learning')) {
+                    containerId = `${framework}Diagram`;
+                    svgId = `${framework}Svg`;
+                } else {
+                    containerId = `${framework}SequenceDiagram`;
+                    svgId = `${framework}SequenceSvg`;
+                }
+                
+                const container = document.getElementById(containerId);
+                if (!container) {
+                    console.error(`Container not found: ${containerId}`);
+                    return;
+                }
+                
+                container.classList.add('visible');
+                if (!sequenceAnimations[framework]) {
+                    sequenceAnimations[framework] = { data: null, playing: false, currentIndex: 0, timeoutId: null };
+                }
+                sequenceAnimations[framework].data = events;
+                sequenceAnimations[framework].currentIndex = 0;
+                sequenceAnimations[framework].playing = false;
+                
+                // Render the diagram with the correct SVG ID
+                renderSequenceDiagram(framework, events, svgId);
+            } catch (error) {
+                console.error(`Error displaying sequence diagram for ${framework}:`, error);
+            }
+        }
+
+        function renderSequenceDiagram(framework, events, svgIdOverride = null) {
+            try {
+                const svgId = svgIdOverride || `${framework}SequenceSvg`;
+                const svg = d3.select(`#${svgId}`);
+                if (svg.empty()) {
+                    console.error(`SVG element not found: ${svgId}`);
+                    return;
+                }
+                svg.selectAll("*").remove();
+                
+                // Extract unique actors FIRST (needed for width calculation)
+                const actors = new Set();
+                events.forEach(event => {
+                    if (event.from) actors.add(event.from);
+                    if (event.to) actors.add(event.to);
+                });
+                const actorList = Array.from(actors);
+                
+                if (actorList.length === 0) {
+                    console.warn(`No actors found for ${framework}`);
+                    return;
+                }
+                
+                // Set SVG dimensions - use container width or minimum
+                const container = svg.node().parentElement;
+                let containerWidth = 600;
+                if (container) {
+                    const rect = container.getBoundingClientRect();
+                    containerWidth = rect.width > 0 ? rect.width - 40 : 600;
+                }
+                // Ensure minimum width based on number of actors
+                const minWidth = Math.max(600, actorList.length * 100);
+                const width = Math.max(containerWidth, minWidth);
+                const height = Math.max(400, events.length * 50 + 100); // Dynamic height based on events
+                const margin = { top: 40, right: 40, bottom: 40, left: 40 };
+                const diagramWidth = width - margin.left - margin.right;
+                const diagramHeight = height - margin.top - margin.bottom;
+                
+                // Set SVG viewBox and dimensions
+                svg.attr("width", "100%")
+                   .attr("height", height)
+                   .attr("viewBox", `0 0 ${width} ${height}`)
+                   .attr("preserveAspectRatio", "xMidYMid meet");
+                
+                // Create main group
+                const g = svg.append("g")
+                    .attr("transform", `translate(${margin.left},${margin.top})`);
+            
+            // Helper function to abbreviate actor names
+            function abbreviateActorName(name) {
+                const abbreviations = {
+                    'SessionService': 'SessionSvc',
+                    'WeatherService': 'WeatherSvc',
+                    'WeatherHelper': 'WeatherHelper',
+                    'PreferencesManager': 'PrefsMgr',
+                    'OpenAIAgent': 'OpenAIAgent',
+                    'WeatherAgent': 'WeatherAgent',
+                    'Weather.get_current': 'WeatherAPI',
+                    'Weather.get_weather_forecast': 'WeatherAPI',
+                    'get_current_weather': 'WeatherAPI',
+                    'get_weather_forecast': 'WeatherAPI'
+                };
+                return abbreviations[name] || name.substring(0, 12);
+            }
+            
+            // Actor positions - ensure minimum spacing
+            const minActorWidth = 80;
+            const totalActorWidth = actorList.length * minActorWidth;
+            const availableWidth = Math.max(diagramWidth, totalActorWidth + 40);
+            const actorSpacing = availableWidth / (actorList.length + 1);
+            const actorPositions = {};
+            actorList.forEach((actor, i) => {
+                actorPositions[actor] = actorSpacing * (i + 1);
+            });
+            
+            // Event positions (vertical spacing) - ensure minimum spacing
+            const minEventSpacing = 50; // Minimum pixels between events
+            const totalEventHeight = events.length * minEventSpacing;
+            const calculatedSpacing = diagramHeight / (events.length + 1);
+            const eventSpacing = Math.max(minEventSpacing, calculatedSpacing);
+            const eventPositions = {};
+            events.forEach((event, i) => {
+                eventPositions[event.timestamp] = 50 + (eventSpacing * i);
+            });
+            
+            // Helper function to sanitize actor names for CSS classes
+            function sanitizeActorName(name) {
+                return name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+            }
+            
+            // Draw actors
+            actorList.forEach(actor => {
+                const x = actorPositions[actor];
+                const actorClass = sanitizeActorName(actor);
+                const displayName = abbreviateActorName(actor);
+                
+                // Actor box - narrower
+                g.append("rect")
+                    .attr("class", `sequence-actor ${framework}-actor-${actorClass}`)
+                    .attr("x", x - 40)
+                    .attr("y", 0)
+                    .attr("width", 80)
+                    .attr("height", 30)
+                    .attr("rx", 5);
+                
+                // Actor label - with truncated text and better positioning
+                const textElement = g.append("text")
+                    .attr("class", "sequence-actor-label")
+                    .attr("x", x)
+                    .attr("y", 20)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "white")
+                    .attr("font-size", "10px")
+                    .attr("font-weight", "bold")
+                    .text(displayName);
+                
+                // Truncate text if too long to fit in box
+                const textNode = textElement.node();
+                if (textNode) {
+                    const textLength = textNode.getComputedTextLength();
+                    if (textLength > 70) {
+                        // Truncate and add ellipsis
+                        let truncated = displayName;
+                        while (textNode.getComputedTextLength() > 70 && truncated.length > 0) {
+                            truncated = truncated.substring(0, truncated.length - 1);
+                            textElement.text(truncated + '...');
+                        }
+                    }
+                }
+                
+                // Lifeline
+                g.append("line")
+                    .attr("class", "sequence-lifeline")
+                    .attr("x1", x)
+                    .attr("y1", 30)
+                    .attr("x2", x)
+                    .attr("y2", diagramHeight)
+                    .attr("stroke", "#dee2e6")
+                    .attr("stroke-width", 1)
+                    .attr("stroke-dasharray", "5,5");
+            });
+            
+            // Add arrow marker
+            svg.append("defs").append("marker")
+                .attr("id", `arrowhead-${framework}`)
+                .attr("viewBox", "0 0 10 10")
+                .attr("refX", 5)
+                .attr("refY", 5)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto")
+                .append("path")
+                .attr("d", "M 0 0 L 10 5 L 0 10 z")
+                .attr("fill", "#667eea");
+            
+            // Draw arrows for events
+            events.forEach((event, index) => {
+                if (!event.from || !event.to) return;
+                if (!actorPositions[event.from] || !actorPositions[event.to]) {
+                    console.warn(`Actor position not found: ${event.from} -> ${event.to}`);
+                    return;
+                }
+                
+                const fromX = actorPositions[event.from];
+                const toX = actorPositions[event.to];
+                const y = eventPositions[event.timestamp] || (50 + (eventSpacing * index));
+                
+                // Determine arrow direction
+                const isRight = toX > fromX;
+                const startX = isRight ? fromX : fromX;
+                const endX = isRight ? toX : toX;
+                const arrowLength = Math.abs(endX - startX);
+                
+                // Arrow line
+                const arrow = g.append("line")
+                    .attr("class", `sequence-arrow ${framework}-arrow-${index}`)
+                    .attr("x1", startX)
+                    .attr("y1", y)
+                    .attr("x2", endX)
+                    .attr("y2", y)
+                    .attr("stroke", getEventColor(event.type))
+                    .attr("stroke-width", 2)
+                    .attr("marker-end", `url(#arrowhead-${framework})`)
+                    .attr("opacity", 0);
+                
+                // Arrow label - position above arrow with better spacing
+                const labelText = event.message || event.type;
+                const labelX = (startX + endX) / 2;
+                const labelY = y - 12; // More space above arrow
+                
+                // Create background rectangle for label to improve readability
+                const labelBg = g.append("rect")
+                    .attr("class", `sequence-label-bg ${framework}-label-bg-${index}`)
+                    .attr("x", labelX - 60)
+                    .attr("y", labelY - 10)
+                    .attr("width", 120)
+                    .attr("height", 16)
+                    .attr("fill", "white")
+                    .attr("stroke", "#dee2e6")
+                    .attr("stroke-width", 1)
+                    .attr("rx", 3)
+                    .attr("opacity", 0);
+                
+                // Arrow label text
+                const label = g.append("text")
+                    .attr("class", `sequence-label ${framework}-label-${index}`)
+                    .attr("x", labelX)
+                    .attr("y", labelY)
+                    .attr("text-anchor", "middle")
+                    .attr("fill", "#333")
+                    .attr("font-size", "10px")
+                    .attr("font-weight", "500")
+                    .attr("opacity", 0)
+                    .text(labelText.length > 20 ? labelText.substring(0, 17) + '...' : labelText);
+            });
+            } catch (error) {
+                console.error(`Error rendering sequence diagram for ${framework}:`, error);
+            }
+        }
+
+        function getEventColor(eventType) {
+            const colors = {
+                'tool_call': '#28a745',
+                'tool_response': '#17a2b8',
+                'llm_processing': '#ffc107',
+                'response': '#667eea',
+                'context_load': '#6c757d',
+                'final_response': '#dc3545',
+                'query_received': '#28a745',
+                'processing': '#17a2b8',
+                'message_enhancement': '#ffc107',
+                'learning_trigger': '#9c27b0',
+                'conversation_storage': '#2196f3',
+                'keyword_extraction': '#ff9800',
+                'preference_update': '#4caf50',
+                'preference_save': '#00bcd4',
+                'cache_invalidation': '#f44336'
+            };
+            return colors[eventType] || '#667eea';
+        }
+
+        // Helper function to sanitize actor names for CSS classes
+        function sanitizeActorName(name) {
+            return name.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+        }
+
+        function playSequenceAnimation(framework) {
+            try {
+                const anim = sequenceAnimations[framework];
+                if (!anim || !anim.data || anim.data.length === 0) {
+                    console.error(`No animation data for ${framework}`);
+                    return;
+                }
+                
+                // Determine button ID based on framework name
+                let playBtnId = `${framework}PlayBtn`;
+                const playBtn = document.getElementById(playBtnId);
+                if (!playBtn) {
+                    console.error(`Play button not found: ${playBtnId}`);
+                    return;
+                }
+                
+                if (anim.playing) {
+                    // Pause
+                    anim.playing = false;
+                    if (anim.timeoutId) {
+                        clearTimeout(anim.timeoutId);
+                    }
+                    playBtn.textContent = '▶ Play';
+                    playBtn.classList.remove('playing');
+                    return;
+                }
+                
+                // Play
+                anim.playing = true;
+                playBtn.textContent = '⏸ Pause';
+                playBtn.classList.add('playing');
+                
+                // Reset all arrows and labels but keep the diagram rendered
+                const svg = d3.select(`#${framework}SequenceSvg`);
+                svg.selectAll(`.${framework}-arrow`).classed('active', false).attr("opacity", 0);
+                svg.selectAll(`.${framework}-label`).classed('active', false).attr("opacity", 0);
+                svg.selectAll(`.${framework}-label-bg`).classed('active', false).attr("opacity", 0);
+                svg.selectAll(`.${framework}-actor`).classed('active', false);
+                
+                anim.currentIndex = 0;
+                
+                // Animate events one by one
+                function animateNext() {
+                    if (!anim.playing || anim.currentIndex >= anim.data.length) {
+                        anim.playing = false;
+                        playBtn.textContent = '▶ Play';
+                        playBtn.classList.remove('playing');
+                        return;
+                    }
+                    
+                    const event = anim.data[anim.currentIndex];
+                    const index = anim.currentIndex;
+                    
+                    // Highlight active actors
+                    if (event.from) {
+                        const fromClass = sanitizeActorName(event.from);
+                        d3.selectAll(`.${framework}-actor-${fromClass}`)
+                            .classed('active', true);
+                    }
+                    if (event.to) {
+                        const toClass = sanitizeActorName(event.to);
+                        d3.selectAll(`.${framework}-actor-${toClass}`)
+                            .classed('active', true);
+                    }
+                    
+                // Show arrow and label
+                const arrowSelector = `.${framework}-arrow-${index}`;
+                const labelSelector = `.${framework}-label-${index}`;
+                const labelBgSelector = `.${framework}-label-bg-${index}`;
+                
+                d3.selectAll(arrowSelector)
+                    .classed('active', true)
+                    .transition()
+                    .duration(600)
+                    .attr("opacity", 1);
+                
+                // Show label background first
+                d3.selectAll(labelBgSelector)
+                    .classed('active', true)
+                    .transition()
+                    .duration(200)
+                    .attr("opacity", 0.9);
+                
+                // Then show label text
+                d3.selectAll(labelSelector)
+                    .classed('active', true)
+                    .transition()
+                    .duration(300)
+                    .attr("opacity", 1);
+                    
+                    // Remove highlight after delay
+                    setTimeout(() => {
+                        if (event.from) {
+                            const fromClass = sanitizeActorName(event.from);
+                            d3.selectAll(`.${framework}-actor-${fromClass}`)
+                                .classed('active', false);
+                        }
+                        if (event.to) {
+                            const toClass = sanitizeActorName(event.to);
+                            d3.selectAll(`.${framework}-actor-${toClass}`)
+                                .classed('active', false);
+                        }
+                    }, 400);
+                    
+                    anim.currentIndex++;
+                    
+                    // Wait before next event (200-600ms)
+                    const delay = event.type === 'final_response' ? 800 : 400;
+                    anim.timeoutId = setTimeout(animateNext, delay);
+                }
+                
+                animateNext();
+            } catch (error) {
+                console.error(`Error in playSequenceAnimation for ${framework}:`, error);
+            }
+        }
+
+        function resetSequenceAnimation(framework) {
+            const anim = sequenceAnimations[framework];
+            if (!anim) return;
+            
+            anim.playing = false;
+            anim.currentIndex = 0;
+            
+            if (anim.timeoutId) {
+                clearTimeout(anim.timeoutId);
+            }
+            
+            // Determine button ID based on framework name
+            let playBtnId;
+            if (framework.includes('Learning')) {
+                playBtnId = `${framework}PlayBtn`;
+            } else {
+                playBtnId = `${framework}PlayBtn`;
+            }
+            
+            const playBtn = document.getElementById(playBtnId);
+            if (playBtn) {
+                playBtn.textContent = '▶ Play';
+                playBtn.classList.remove('playing');
+            }
+            
+            // Hide all arrows and labels
+            d3.selectAll(`.${framework}-arrow`).classed('active', false).attr("opacity", 0);
+            d3.selectAll(`.${framework}-label`).classed('active', false).attr("opacity", 0);
+            d3.selectAll(`.${framework}-label-bg`).classed('active', false).attr("opacity", 0);
+            d3.selectAll(`.${framework}-actor`).classed('active', false);
+            
+            // Re-render if we have data
+            if (anim.data) {
+                let svgId = null;
+                if (framework.includes('Learning')) {
+                    svgId = `${framework}Svg`;
+                } else {
+                    svgId = `${framework}SequenceSvg`;
+                }
+                renderSequenceDiagram(framework, anim.data, svgId);
+            }
+        }
+    </script>
+</body>
+</html>
+
