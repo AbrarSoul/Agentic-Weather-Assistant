@@ -22,6 +22,7 @@ A comprehensive weather assistant project that compares two AI agent frameworks:
   - [MS Architecture](#ms-architecture)
 - [Usage Examples](#usage-examples)
 - [Key Differences](#key-differences)
+- [Metrics Assessment](#metrics-assessment)
 - [Troubleshooting](#troubleshooting)
 - [License](#license)
 
@@ -359,6 +360,19 @@ The assistant learns from statements like:
 | **Preference Learning** | Tool-based updates | Manager-based updates |
 | **Agent Caching** | Per-user agent caching | Single agent instance |
 | **Context Injection** | Via agent instructions | Via message enhancement |
+
+## Metrics Assessment
+
+This project includes a comprehensive evaluation system that assesses both frameworks across 15 distinct metrics. For detailed information about how metrics are calculated and evaluated, see:
+
+**[METRICS_ASSESSMENT_EXPLANATION.md](METRICS_ASSESSMENT_EXPLANATION.md)**
+
+The metrics cover:
+- **Functional Performance**: Accuracy, task completion, recommendation quality, context retention, adaptation, response time, tool efficiency, action planning, error recovery
+- **Developer Experience**: Implementation effort, integration simplicity, debuggability
+- **Behavioral Quality**: Ambiguity handling, repeatability
+
+The evaluation system runs automatically when using the comparison app, providing real-time metrics for each response.
 
 ## Troubleshooting
 
